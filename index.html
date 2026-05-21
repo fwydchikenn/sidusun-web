@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiDusun — Sistem Informasi Dusun</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== HALAMAN LOGIN ===== -->
+<div id="halaman-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="ikon-dusun">🏡</div>
+      <h1>SiDusun</h1>
+      <p>Sistem Informasi Manajemen Dusun</p>
+    </div>
+    <div class="field-group">
+      <label>Username</label>
+      <input type="text" id="input-user" placeholder="Masukkan username" />
+    </div>
+    <div class="field-group">
+      <label>Password</label>
+      <input type="password" id="input-pass" placeholder="Masukkan password" />
+    </div>
+    <div class="field-group">
+      <label>Login Sebagai</label>
+      <select id="input-role">
+        <option value="admin">Admin Dusun</option>
+        <option value="user">Warga / Petugas</option>
+      </select>
+    </div>
+    <button class="btn-login" onclick="prosesLogin()">Masuk</button>
+    <div class="pesan-error" id="pesan-error">❌ Username atau password salah.</div>
+    <div class="info-demo">
+      <b>🔑 Akun Demo:</b>
+      Admin: <code>admin</code> / <code>admin123</code><br>
+      User: <code>warga</code> / <code>warga123</code>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APLIKASI UTAMA ===== -->
+<div id="aplikasi" style="display:none;flex-direction:column;">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-kiri">
+      <span style="font-size:22px">🏡</span>
+      <span class="nama-app">SiDusun</span>
+      <span style="opacity:.5;font-size:18px">|</span>
+      <span style="font-size:13px;opacity:.8" id="nama-dusun-top">Dusun Makmur</span>
+    </div>
+    <div class="topbar-kanan">
+      <span class="info-user" id="info-user-topbar"></span>
+      <span class="badge-role" id="badge-role-topbar"></span>
+      <button class="btn-keluar" onclick="keluar()">Keluar</button>
+    </div>
+  </div>
+
+  <div class="konten-utama">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-grup">
+        <div class="sidebar-label">Menu Utama</div>
+        <div class="menu-item aktif" onclick="bukaHalaman('dashboard')" id="menu-dashboard">
+          <span class="ikon">📊</span> Dashboard
+        </div>
+        <div class="menu-item" onclick="bukaHalaman('penduduk')" id="menu-penduduk">
+          <span class="ikon">👥</span> Data Penduduk
+        </div>
+        <div class="menu-item" onclick="bukaHalaman('surat')" id="menu-surat">
+          <span class="ikon">📄</span> Surat Keterangan
+        </div>
+        <div class="menu-item" onclick="bukaHalaman('keuangan')" id="menu-keuangan">
+          <span class="ikon">💰</span> Keuangan
+        </div>
+        <div class="menu-item" onclick="bukaHalaman('pengumuman')" id="menu-pengumuman">
+          <span class="ikon">📢</span> Pengumuman
+        </div>
+      </div>
+      <div class="sidebar-grup" id="grup-admin">
+        <div class="sidebar-label">Admin</div>
+        <div class="menu-item" onclick="bukaHalaman('pengguna')" id="menu-pengguna">
+          <span class="ikon">👤</span> Kelola Pengguna
+        </div>
+        <div class="menu-item" onclick="bukaHalaman('pengaturan')" id="menu-pengaturan">
+          <span class="ikon">⚙️</span> Pengaturan
+        </div>
+      </div>
+    </div>
+
+    <!-- Area konten -->
+    <div class="area-konten">
+
+      <!-- ===== DASHBOARD ===== -->
+      <div class="halaman aktif" id="halaman-dashboard">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+          <p>Ringkasan data dusun hari ini</p>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="ikon-stat">👥</div>
+            <div class="angka" id="stat-penduduk">0</div>
+            <div class="label">Total Penduduk</div>
+          </div>
+          <div class="stat-card">
+            <div class="ikon-stat">🏠</div>
+            <div class="angka" id="stat-kk">0</div>
+            <div class="label">Kartu Keluarga</div>
+          </div>
+          <div class="stat-card">
+            <div class="ikon-stat">📄</div>
+            <div class="angka" id="stat-surat">0</div>
+            <div class="label">Surat Diproses</div>
+          </div>
+          <div class="stat-card">
+            <div class="ikon-stat">💰</div>
+            <div class="angka" id="stat-kas">Rp0</div>
+            <div class="label">Saldo Kas Dusun</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="kartu">
+            <div class="kartu-judul">📋 Aktivitas Terbaru</div>
+            <div id="aktivitas-list" style="font-size:13px;color:var(--teks-abu);">Memuat data...</div>
+          </div>
+          <div class="kartu">
+            <div class="kartu-judul">📢 Pengumuman Terkini</div>
+            <div id="pengumuman-mini" style="font-size:13px;color:var(--teks-abu);">Memuat data...</div>
+          </div>
+        </div>
+
+        <div class="kartu" style="margin-top:16px;">
+          <div class="kartu-judul">🔗 Sumber Data (Google Sheets)</div>
+          <div class="info-sheets">
+            Data aplikasi ini terhubung dengan Google Sheets. Konfigurasi URL spreadsheet di menu <strong>Pengaturan</strong>. Saat ini menggunakan <strong>data lokal (demo)</strong> — hubungkan ke Sheets nyata untuk data permanen.
+          </div>
+          <div style="font-size:13px;color:var(--teks-abu);line-height:1.8;">
+            📌 Sheet yang diperlukan: <code>Penduduk</code> | <code>Surat</code> | <code>Keuangan</code> | <code>Pengumuman</code> | <code>Pengguna</code>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PENDUDUK ===== -->
+      <div class="halaman" id="halaman-penduduk">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h2>Data Penduduk</h2>
+              <p>Kelola data kependudukan dusun</p>
+            </div>
+            <button class="btn btn-hijau" onclick="modalPenduduk()">+ Tambah Penduduk</button>
+          </div>
+        </div>
+        <div class="kartu">
+          <div class="toolbar">
+            <input type="text" id="cari-penduduk" placeholder="🔍 Cari nama, NIK, RT..." oninput="renderTabelPenduduk()">
+            <select id="filter-rt" onchange="renderTabelPenduduk()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--bg);">
+              <option value="">Semua RT</option>
+              <option>RT 01</option><option>RT 02</option><option>RT 03</option>
+            </select>
+            <button class="btn btn-outline" onclick="eksporSheets('penduduk')">📤 Ekspor</button>
+            <button class="btn btn-outline" onclick="imporSheets('penduduk')">📥 Sinkron Sheets</button>
+          </div>
+          <div class="tabel-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>No</th><th>NIK</th><th>Nama Lengkap</th>
+                  <th>L/P</th><th>Tgl Lahir</th><th>RT/RW</th>
+                  <th>Status KK</th><th>Pekerjaan</th><th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-penduduk"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:var(--teks-abu);" id="info-total-penduduk"></div>
+        </div>
+      </div>
+
+      <!-- ===== SURAT ===== -->
+      <div class="halaman" id="halaman-surat">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h2>Surat Keterangan</h2>
+              <p>Ajukan dan kelola surat keterangan warga</p>
+            </div>
+            <button class="btn btn-hijau" onclick="modalSurat()">+ Ajukan Surat</button>
+          </div>
+        </div>
+        <div class="kartu">
+          <div class="toolbar">
+            <input type="text" id="cari-surat" placeholder="🔍 Cari nama pemohon..." oninput="renderTabelSurat()">
+            <select id="filter-jenis-surat" onchange="renderTabelSurat()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--bg);">
+              <option value="">Semua Jenis</option>
+              <option>Keterangan Domisili</option>
+              <option>Keterangan Tidak Mampu</option>
+              <option>Keterangan Usaha</option>
+              <option>Pengantar KTP</option>
+              <option>Lainnya</option>
+            </select>
+            <button class="btn btn-outline" onclick="imporSheets('surat')">📥 Sinkron Sheets</button>
+          </div>
+          <div class="tabel-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>No Surat</th><th>Pemohon</th><th>Jenis Surat</th>
+                  <th>Tgl Pengajuan</th><th>Keperluan</th><th>Status</th><th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-surat"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== KEUANGAN ===== -->
+      <div class="halaman" id="halaman-keuangan">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h2>Keuangan Dusun</h2>
+              <p>Pencatatan pemasukan dan pengeluaran kas</p>
+            </div>
+            <button class="btn btn-hijau" onclick="modalKeuangan()">+ Catat Transaksi</button>
+          </div>
+        </div>
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card" style="border-left:4px solid var(--hijau)">
+            <div class="angka" id="total-masuk" style="color:var(--hijau)">Rp0</div>
+            <div class="label">Total Pemasukan</div>
+          </div>
+          <div class="stat-card" style="border-left:4px solid var(--merah)">
+            <div class="angka" id="total-keluar" style="color:var(--merah)">Rp0</div>
+            <div class="label">Total Pengeluaran</div>
+          </div>
+          <div class="stat-card" style="border-left:4px solid var(--emas)">
+            <div class="angka" id="saldo-kas" style="color:var(--emas)">Rp0</div>
+            <div class="label">Saldo Kas</div>
+          </div>
+        </div>
+        <div class="kartu">
+          <div class="kartu-judul">Riwayat Transaksi
+            <button class="btn btn-outline" onclick="imporSheets('keuangan')">📥 Sinkron</button>
+          </div>
+          <div class="tabel-wrapper">
+            <table>
+              <thead>
+                <tr><th>Tanggal</th><th>Keterangan</th><th>Jenis</th><th>Jumlah</th><th>Saldo</th><th>Aksi</th></tr>
+              </thead>
+              <tbody id="tbody-keuangan"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PENGUMUMAN ===== -->
+      <div class="halaman" id="halaman-pengumuman">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h2>Pengumuman</h2>
+              <p>Informasi dan pengumuman dusun</p>
+            </div>
+            <button class="btn btn-hijau" id="btn-tambah-pengumuman" onclick="modalPengumuman()">+ Buat Pengumuman</button>
+          </div>
+        </div>
+        <div id="list-pengumuman"></div>
+      </div>
+
+      <!-- ===== PENGGUNA (ADMIN) ===== -->
+      <div class="halaman" id="halaman-pengguna">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <h2>Kelola Pengguna</h2>
+              <p>Manajemen akun pengguna sistem</p>
+            </div>
+            <button class="btn btn-hijau" onclick="modalPengguna()">+ Tambah Pengguna</button>
+          </div>
+        </div>
+        <div class="kartu">
+          <div class="tabel-wrapper">
+            <table>
+              <thead>
+                <tr><th>No</th><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Status</th><th>Terakhir Login</th><th>Aksi</th></tr>
+              </thead>
+              <tbody id="tbody-pengguna"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== PENGATURAN ===== -->
+      <div class="halaman" id="halaman-pengaturan">
+        <div class="page-header">
+          <h2>Pengaturan</h2>
+          <p>Konfigurasi sistem dan koneksi database</p>
+        </div>
+
+        <div class="kartu">
+          <div class="kartu-judul">🔗 Koneksi Google Sheets</div>
+          <div class="info-sheets">
+            <strong>Cara menghubungkan:</strong> Buat Google Spreadsheet baru → File → Share → Anyone with link (Viewer) → Salin ID spreadsheet (dari URL) → Paste di bawah. Untuk <em>write</em>, deploy sebagai Google Apps Script Web App.
+          </div>
+          <div class="config-row">
+            <label>Spreadsheet ID</label>
+            <input type="text" id="cfg-sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+          </div>
+          <div class="config-row">
+            <label>Apps Script URL (Write)</label>
+            <input type="text" id="cfg-script-url" placeholder="https://script.google.com/macros/s/.../exec">
+          </div>
+          <div class="config-row">
+            <label>Nama Dusun</label>
+            <input type="text" id="cfg-nama-dusun" placeholder="Dusun Makmur">
+          </div>
+          <div class="config-row">
+            <label>Nama Desa/Kelurahan</label>
+            <input type="text" id="cfg-nama-desa" placeholder="Desa Sejahtera">
+          </div>
+          <div class="config-row">
+            <label>Kecamatan</label>
+            <input type="text" id="cfg-kecamatan" placeholder="Kecamatan Maju">
+          </div>
+          <div style="margin-top:20px;display:flex;gap:10px;">
+            <button class="btn btn-hijau" onclick="simpanPengaturan()">💾 Simpan Pengaturan</button>
+            <button class="btn btn-outline" onclick="tesKoneksi()">🔌 Tes Koneksi Sheets</button>
+          </div>
+        </div>
+
+        <div class="kartu" style="margin-top:16px;">
+          <div class="kartu-judul">📋 Panduan Google Sheets</div>
+          <div style="font-size:13.5px;line-height:2;color:var(--teks);">
+            <p>Buat spreadsheet dengan tab/sheet berikut:</p>
+            <br>
+            <strong>Sheet: Penduduk</strong><br>
+            Kolom: NIK | Nama | JenisKelamin | TglLahir | RT | RW | Agama | Pekerjaan | StatusKK | NoKK<br><br>
+            <strong>Sheet: Surat</strong><br>
+            Kolom: NoSurat | Pemohon | JenisSurat | TglPengajuan | Keperluan | Status<br><br>
+            <strong>Sheet: Keuangan</strong><br>
+            Kolom: Tanggal | Keterangan | Jenis | Jumlah | Saldo | Petugas<br><br>
+            <strong>Sheet: Pengumuman</strong><br>
+            Kolom: Judul | Isi | Tanggal | Prioritas | Penulis<br><br>
+            <strong>Sheet: Pengguna</strong><br>
+            Kolom: Username | Password | NamaLengkap | Role | Status
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end area-konten -->
+  </div>
+</div>
+
+<!-- ===== MODAL TAMBAH PENDUDUK ===== -->
+<div class="modal-bg" id="modal-penduduk">
+  <div class="modal-box">
+    <div class="modal-judul">
+      <span id="judul-modal-penduduk">Tambah Data Penduduk</span>
+      <button class="btn-tutup" onclick="tutupModal('modal-penduduk')">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>NIK</label><input id="f-nik" placeholder="16 digit NIK"></div>
+      <div class="modal-field"><label>No. KK</label><input id="f-nokk" placeholder="No. Kartu Keluarga"></div>
+      <div class="modal-field span2"><label>Nama Lengkap</label><input id="f-nama" placeholder="Nama sesuai KTP"></div>
+      <div class="modal-field"><label>Jenis Kelamin</label>
+        <select id="f-jk"><option value="L">Laki-laki</option><option value="P">Perempuan</option></select>
+      </div>
+      <div class="modal-field"><label>Tanggal Lahir</label><input type="date" id="f-ttl"></div>
+      <div class="modal-field"><label>RT</label>
+        <select id="f-rt"><option>RT 01</option><option>RT 02</option><option>RT 03</option></select>
+      </div>
+      <div class="modal-field"><label>RW</label>
+        <select id="f-rw"><option>RW 01</option><option>RW 02</option></select>
+      </div>
+      <div class="modal-field"><label>Agama</label>
+        <select id="f-agama"><option>Islam</option><option>Kristen</option><option>Katolik</option><option>Hindu</option><option>Buddha</option></select>
+      </div>
+      <div class="modal-field"><label>Pekerjaan</label><input id="f-pekerjaan" placeholder="Petani, Pedagang, dll"></div>
+      <div class="modal-field"><label>Status dalam KK</label>
+        <select id="f-status-kk"><option>Kepala Keluarga</option><option>Istri</option><option>Anak</option><option>Orang Tua</option><option>Lainnya</option></select>
+      </div>
+      <div class="modal-field"><label>No. HP</label><input id="f-hp" placeholder="08xx-xxxx-xxxx"></div>
+    </div>
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-outline" onclick="tutupModal('modal-penduduk')">Batal</button>
+      <button class="btn btn-hijau" onclick="simpanPenduduk()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SURAT ===== -->
+<div class="modal-bg" id="modal-surat">
+  <div class="modal-box">
+    <div class="modal-judul">
+      <span>Pengajuan Surat Keterangan</span>
+      <button class="btn-tutup" onclick="tutupModal('modal-surat')">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field span2"><label>Nama Pemohon</label><input id="s-pemohon" placeholder="Nama lengkap pemohon"></div>
+      <div class="modal-field"><label>NIK Pemohon</label><input id="s-nik" placeholder="NIK"></div>
+      <div class="modal-field"><label>Jenis Surat</label>
+        <select id="s-jenis">
+          <option>Keterangan Domisili</option>
+          <option>Keterangan Tidak Mampu</option>
+          <option>Keterangan Usaha</option>
+          <option>Pengantar KTP</option>
+          <option>Lainnya</option>
+        </select>
+      </div>
+      <div class="modal-field span2"><label>Keperluan / Tujuan</label>
+        <textarea id="s-keperluan" rows="3" placeholder="Jelaskan keperluan pengajuan surat..."></textarea>
+      </div>
+      <div class="modal-field"><label>Tanggal Pengajuan</label><input type="date" id="s-tgl"></div>
+      <div class="modal-field"><label>Status</label>
+        <select id="s-status"><option>Menunggu</option><option>Diproses</option><option>Selesai</option><option>Ditolak</option></select>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-outline" onclick="tutupModal('modal-surat')">Batal</button>
+      <button class="btn btn-hijau" onclick="simpanSurat()">📄 Ajukan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL KEUANGAN ===== -->
+<div class="modal-bg" id="modal-keuangan">
+  <div class="modal-box">
+    <div class="modal-judul">
+      <span>Catat Transaksi</span>
+      <button class="btn-tutup" onclick="tutupModal('modal-keuangan')">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Tanggal</label><input type="date" id="k-tgl"></div>
+      <div class="modal-field"><label>Jenis</label>
+        <select id="k-jenis"><option value="masuk">Pemasukan</option><option value="keluar">Pengeluaran</option></select>
+      </div>
+      <div class="modal-field span2"><label>Keterangan</label><input id="k-ket" placeholder="Keterangan transaksi"></div>
+      <div class="modal-field"><label>Jumlah (Rp)</label><input type="number" id="k-jumlah" placeholder="0"></div>
+      <div class="modal-field"><label>Petugas</label><input id="k-petugas" placeholder="Nama petugas"></div>
+    </div>
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-outline" onclick="tutupModal('modal-keuangan')">Batal</button>
+      <button class="btn btn-hijau" onclick="simpanKeuangan()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL PENGUMUMAN ===== -->
+<div class="modal-bg" id="modal-pengumuman">
+  <div class="modal-box">
+    <div class="modal-judul">
+      <span>Buat Pengumuman</span>
+      <button class="btn-tutup" onclick="tutupModal('modal-pengumuman')">✕</button>
+    </div>
+    <div class="modal-field"><label>Judul Pengumuman</label><input id="p-judul" placeholder="Judul pengumuman"></div>
+    <div class="modal-field" style="margin-top:12px;"><label>Isi Pengumuman</label>
+      <textarea id="p-isi" rows="5" placeholder="Tulis isi pengumuman di sini..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;">
+      <div class="modal-field"><label>Tanggal</label><input type="date" id="p-tgl"></div>
+      <div class="modal-field"><label>Prioritas</label>
+        <select id="p-prioritas"><option value="normal">Normal</option><option value="penting">Penting</option><option value="urgent">Mendesak</option></select>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-outline" onclick="tutupModal('modal-pengumuman')">Batal</button>
+      <button class="btn btn-hijau" onclick="simpanPengumuman()">📢 Publikasi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL PENGGUNA ===== -->
+<div class="modal-bg" id="modal-pengguna">
+  <div class="modal-box">
+    <div class="modal-judul">
+      <span>Tambah Pengguna</span>
+      <button class="btn-tutup" onclick="tutupModal('modal-pengguna')">✕</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Username</label><input id="u-username" placeholder="username unik"></div>
+      <div class="modal-field"><label>Password</label><input type="password" id="u-password" placeholder="Password"></div>
+      <div class="modal-field span2"><label>Nama Lengkap</label><input id="u-nama" placeholder="Nama lengkap pengguna"></div>
+      <div class="modal-field"><label>Role</label>
+        <select id="u-role"><option value="admin">Admin</option><option value="user">User</option></select>
+      </div>
+      <div class="modal-field"><label>Status</label>
+        <select id="u-status"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-outline" onclick="tutupModal('modal-pengguna')">Batal</button>
+      <button class="btn btn-hijau" onclick="simpanPengguna()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// DATA STORE (LocalStorage + Demo Data)
+// ============================================================
+const STORE_KEY = 'sidusun_data';
+
+function loadData() {
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) return JSON.parse(raw);
+  return getDataDemo();
+}
+function saveData(data) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+}
+
+function getDataDemo() {
+  return {
+    pengaturan: {
+      sheetId: '',
+      scriptUrl: '',
+      namaDusun: 'Dusun Makmur',
+      namaDesa: 'Desa Sejahtera',
+      kecamatan: 'Kecamatan Maju'
+    },
+    pengguna: [
+      { username:'admin', password:'admin123', nama:'Kepala Dusun', role:'admin', status:'aktif', lastLogin:'-' },
+      { username:'warga', password:'warga123', nama:'Budi Santoso', role:'user', status:'aktif', lastLogin:'-' },
+    ],
+    penduduk: [
+      { nik:'3271010101900001', nokk:'3271010101900001', nama:'Budi Santoso', jk:'L', ttl:'1990-01-01', rt:'RT 01', rw:'RW 01', agama:'Islam', pekerjaan:'Petani', statusKK:'Kepala Keluarga', hp:'081234567890' },
+      { nik:'3271010201920002', nokk:'3271010101900001', nama:'Siti Aminah', jk:'P', ttl:'1992-02-15', rt:'RT 01', rw:'RW 01', agama:'Islam', pekerjaan:'Ibu Rumah Tangga', statusKK:'Istri', hp:'081234567891' },
+      { nik:'3271010301850003', nokk:'3271010301850003', nama:'Pak Darno', jk:'L', ttl:'1985-03-20', rt:'RT 02', rw:'RW 01', agama:'Islam', pekerjaan:'Pedagang', statusKK:'Kepala Keluarga', hp:'081234567892' },
+      { nik:'3271010401950004', nokk:'3271010401950004', nama:'Dewi Rahayu', jk:'P', ttl:'1995-04-10', rt:'RT 02', rw:'RW 01', agama:'Kristen', pekerjaan:'Guru', statusKK:'Kepala Keluarga', hp:'081234567893' },
+      { nik:'3271010501880005', nokk:'3271010501880005', nama:'Hendra Gunawan', jk:'L', ttl:'1988-05-05', rt:'RT 03', rw:'RW 01', agama:'Islam', pekerjaan:'Wiraswasta', statusKK:'Kepala Keluarga', hp:'081234567894' },
+    ],
+    surat: [
+      { noSurat:'S-001/DS/2024', pemohon:'Budi Santoso', jenis:'Keterangan Domisili', tgl:'2024-01-10', keperluan:'Keperluan bank', status:'Selesai' },
+      { noSurat:'S-002/DS/2024', pemohon:'Dewi Rahayu', jenis:'Keterangan Tidak Mampu', tgl:'2024-01-15', keperluan:'Beasiswa anak', status:'Diproses' },
+      { noSurat:'S-003/DS/2024', pemohon:'Pak Darno', jenis:'Keterangan Usaha', tgl:'2024-01-20', keperluan:'Perizinan usaha', status:'Menunggu' },
+    ],
+    keuangan: [
+      { tgl:'2024-01-01', ket:'Saldo awal kas', jenis:'masuk', jumlah:5000000 },
+      { tgl:'2024-01-05', ket:'Iuran warga RT01', jenis:'masuk', jumlah:500000 },
+      { tgl:'2024-01-10', ket:'Pembelian ATK', jenis:'keluar', jumlah:150000 },
+      { tgl:'2024-01-15', ket:'Kegiatan rapat RT', jenis:'keluar', jumlah:300000 },
+      { tgl:'2024-01-20', ket:'Donasi warga', jenis:'masuk', jumlah:1000000 },
+    ],
+    pengumuman: [
+      { judul:'Gotong Royong Minggu Ini', isi:'Diberitahukan kepada seluruh warga dusun bahwa akan diadakan kegiatan gotong royong setiap hari Minggu pagi pukul 07.00. Mohon partisipasi aktif seluruh warga.', tgl:'2024-01-20', prioritas:'penting', penulis:'Kepala Dusun' },
+      { judul:'Pembagian Sembako Gratis', isi:'Akan dilaksanakan pembagian sembako gratis bagi warga kurang mampu. Daftarkan diri ke pos kamling setempat paling lambat tanggal 25 Januari 2024.', tgl:'2024-01-18', prioritas:'urgent', penulis:'Kepala Dusun' },
+      { judul:'Jadwal Posyandu Februari', isi:'Posyandu bulan Februari akan dilaksanakan pada tanggal 5 Februari 2024 di Balai Dusun. Harap membawa KMS dan buku kesehatan anak.', tgl:'2024-01-16', prioritas:'normal', penulis:'Kader Posyandu' },
+    ]
+  };
+}
+
+let DB = loadData();
+let userLogin = null;
+
+// ============================================================
+// AUTH
+// ============================================================
+function prosesLogin() {
+  const u = document.getElementById('input-user').value.trim();
+  const p = document.getElementById('input-pass').value;
+  const r = document.getElementById('input-role').value;
+  const found = DB.pengguna.find(x => x.username === u && x.password === p && x.role === r && x.status === 'aktif');
+  if (!found) {
+    document.getElementById('pesan-error').style.display = 'block';
+    return;
+  }
+  userLogin = found;
+  found.lastLogin = new Date().toLocaleString('id-ID');
+  saveData(DB);
+  document.getElementById('halaman-login').style.display = 'none';
+  const app = document.getElementById('aplikasi');
+  app.style.display = 'flex';
+  document.getElementById('info-user-topbar').textContent = found.nama;
+  document.getElementById('badge-role-topbar').textContent = found.role === 'admin' ? '👑 Admin' : '👤 User';
+  document.getElementById('nama-dusun-top').textContent = DB.pengaturan.namaDusun;
+  // Tampilkan/sembunyikan menu admin
+  const grupAdmin = document.getElementById('grup-admin');
+  grupAdmin.style.display = found.role === 'admin' ? '' : 'none';
+  if (found.role === 'user') {
+    document.getElementById('btn-tambah-pengumuman').style.display = 'none';
+  }
+  refreshSemua();
+  bukaHalaman('dashboard');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('halaman-login').style.display !== 'none') prosesLogin();
+});
+
+function keluar() {
+  userLogin = null;
+  document.getElementById('halaman-login').style.display = 'flex';
+  document.getElementById('aplikasi').style.display = 'none';
+  document.getElementById('input-user').value = '';
+  document.getElementById('input-pass').value = '';
+  document.getElementById('pesan-error').style.display = 'none';
+}
+
+// ============================================================
+// NAVIGASI
+// ============================================================
+function bukaHalaman(nama) {
+  document.querySelectorAll('.halaman').forEach(h => h.classList.remove('aktif'));
+  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('aktif'));
+  document.getElementById('halaman-' + nama).classList.add('aktif');
+  const mi = document.getElementById('menu-' + nama);
+  if (mi) mi.classList.add('aktif');
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function tutupModal(id) { document.getElementById(id).classList.remove('tampil'); }
+function bukaModal(id) { document.getElementById(id).classList.add('tampil'); }
+window.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-bg')) e.target.classList.remove('tampil');
+});
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = ok ? 'var(--hijau)' : 'var(--merah)';
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2800);
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function refreshDashboard() {
+  document.getElementById('stat-penduduk').textContent = DB.penduduk.length;
+  const kk = new Set(DB.penduduk.map(p => p.nokk)).size;
+  document.getElementById('stat-kk').textContent = kk;
+  document.getElementById('stat-surat').textContent = DB.surat.filter(s => s.status !== 'Selesai').length;
+  const saldo = hitungSaldo();
+  document.getElementById('stat-kas').textContent = formatRp(saldo);
+
+  // Aktivitas
+  const akt = [
+    ...DB.surat.slice(-3).reverse().map(s => `📄 Surat: <b>${s.pemohon}</b> — ${s.jenis}`),
+    ...DB.keuangan.slice(-2).reverse().map(k => `💰 ${k.jenis==='masuk'?'Pemasukan':'Pengeluaran'}: ${k.ket} (${formatRp(k.jumlah)})`),
+  ];
+  document.getElementById('aktivitas-list').innerHTML = akt.length
+    ? akt.map(a => `<div style="padding:8px 0;border-bottom:1px solid var(--border);">${a}</div>`).join('')
+    : '<span>Belum ada aktivitas.</span>';
+
+  const pa = DB.pengumuman.slice(0, 3);
+  document.getElementById('pengumuman-mini').innerHTML = pa.length
+    ? pa.map(p => `<div style="padding:8px 0;border-bottom:1px solid var(--border);"><b>${p.judul}</b><br><span style="font-size:12px">${p.tgl}</span></div>`).join('')
+    : '<span>Belum ada pengumuman.</span>';
+}
+
+// ============================================================
+// PENDUDUK
+// ============================================================
+function modalPenduduk(idx=null) {
+  ['f-nik','f-nokk','f-nama','f-ttl','f-pekerjaan','f-hp'].forEach(id => document.getElementById(id).value = '');
+  if (idx !== null) {
+    const d = DB.penduduk[idx];
+    document.getElementById('f-nik').value = d.nik;
+    document.getElementById('f-nokk').value = d.nokk;
+    document.getElementById('f-nama').value = d.nama;
+    document.getElementById('f-jk').value = d.jk;
+    document.getElementById('f-ttl').value = d.ttl;
+    document.getElementById('f-rt').value = d.rt;
+    document.getElementById('f-rw').value = d.rw;
+    document.getElementById('f-agama').value = d.agama;
+    document.getElementById('f-pekerjaan').value = d.pekerjaan;
+    document.getElementById('f-status-kk').value = d.statusKK;
+    document.getElementById('f-hp').value = d.hp;
+    document.getElementById('judul-modal-penduduk').textContent = 'Edit Data Penduduk';
+    document.getElementById('f-nik').dataset.editIdx = idx;
+  } else {
+    document.getElementById('judul-modal-penduduk').textContent = 'Tambah Data Penduduk';
+    delete document.getElementById('f-nik').dataset.editIdx;
+  }
+  bukaModal('modal-penduduk');
+}
+
+function simpanPenduduk() {
+  const data = {
+    nik: document.getElementById('f-nik').value.trim(),
+    nokk: document.getElementById('f-nokk').value.trim(),
+    nama: document.getElementById('f-nama').value.trim(),
+    jk: document.getElementById('f-jk').value,
+    ttl: document.getElementById('f-ttl').value,
+    rt: document.getElementById('f-rt').value,
+    rw: document.getElementById('f-rw').value,
+    agama: document.getElementById('f-agama').value,
+    pekerjaan: document.getElementById('f-pekerjaan').value.trim(),
+    statusKK: document.getElementById('f-status-kk').value,
+    hp: document.getElementById('f-hp').value.trim(),
+  };
+  if (!data.nik || !data.nama) { toast('NIK dan Nama wajib diisi!', false); return; }
+  const editIdx = document.getElementById('f-nik').dataset.editIdx;
+  if (editIdx !== undefined) {
+    DB.penduduk[parseInt(editIdx)] = data;
+    toast('Data berhasil diperbarui!');
+  } else {
+    DB.penduduk.push(data);
+    toast('Data penduduk ditambahkan!');
+  }
+  saveData(DB);
+  tutupModal('modal-penduduk');
+  renderTabelPenduduk();
+  refreshDashboard();
+  sinkronKeSheets('Penduduk', DB.penduduk);
+}
+
+function hapusPenduduk(idx) {
+  if (!confirm('Hapus data penduduk ini?')) return;
+  DB.penduduk.splice(idx, 1);
+  saveData(DB);
+  renderTabelPenduduk();
+  refreshDashboard();
+  toast('Data dihapus.');
+}
+
+function renderTabelPenduduk() {
+  const cari = document.getElementById('cari-penduduk').value.toLowerCase();
+  const filterRt = document.getElementById('filter-rt').value;
+  let data = DB.penduduk.filter(p => {
+    const cocok = p.nama.toLowerCase().includes(cari) || p.nik.includes(cari) || p.rt.toLowerCase().includes(cari);
+    const rtOk = !filterRt || p.rt === filterRt;
+    return cocok && rtOk;
+  });
+  const tbody = document.getElementById('tbody-penduduk');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--teks-abu);padding:24px">Tidak ada data</td></tr>'; return; }
+  tbody.innerHTML = data.map((p, i) => {
+    const idxAsli = DB.penduduk.indexOf(p);
+    return `<tr>
+      <td>${i+1}</td>
+      <td style="font-size:12px">${p.nik}</td>
+      <td><b>${p.nama}</b></td>
+      <td>${p.jk}</td>
+      <td>${p.ttl}</td>
+      <td>${p.rt}/${p.rw}</td>
+      <td><span class="badge badge-hijau">${p.statusKK}</span></td>
+      <td>${p.pekerjaan}</td>
+      <td>
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:11px" onclick="modalPenduduk(${idxAsli})">✏️</button>
+        <button class="btn btn-merah" style="padding:5px 10px;font-size:11px;margin-left:4px" onclick="hapusPenduduk(${idxAsli})">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('info-total-penduduk').textContent = `Menampilkan ${data.length} dari ${DB.penduduk.length} penduduk`;
+}
+
+// ============================================================
+// SURAT
+// ============================================================
+let noSuratCounter = 100;
+function modalSurat() {
+  document.getElementById('s-tgl').value = new Date().toISOString().split('T')[0];
+  bukaModal('modal-surat');
+}
+function simpanSurat() {
+  const data = {
+    noSurat: `S-${String(++noSuratCounter).padStart(3,'0')}/DS/${new Date().getFullYear()}`,
+    pemohon: document.getElementById('s-pemohon').value.trim(),
+    jenis: document.getElementById('s-jenis').value,
+    tgl: document.getElementById('s-tgl').value,
+    keperluan: document.getElementById('s-keperluan').value.trim(),
+    status: document.getElementById('s-status').value,
+  };
+  if (!data.pemohon) { toast('Nama pemohon wajib diisi!', false); return; }
+  DB.surat.push(data);
+  saveData(DB);
+  tutupModal('modal-surat');
+  renderTabelSurat();
+  refreshDashboard();
+  toast('Surat berhasil diajukan!');
+  sinkronKeSheets('Surat', DB.surat);
+}
+function ubahStatusSurat(idx, status) {
+  DB.surat[idx].status = status;
+  saveData(DB);
+  renderTabelSurat();
+  refreshDashboard();
+  toast('Status surat diperbarui!');
+}
+function renderTabelSurat() {
+  const cari = document.getElementById('cari-surat').value.toLowerCase();
+  const filterJenis = document.getElementById('filter-jenis-surat').value;
+  const data = DB.surat.filter(s => {
+    const cocok = s.pemohon.toLowerCase().includes(cari);
+    const jenisOk = !filterJenis || s.jenis === filterJenis;
+    return cocok && jenisOk;
+  });
+  const statusBadge = { 'Menunggu':'badge-emas', 'Diproses':'badge-biru', 'Selesai':'badge-hijau', 'Ditolak':'badge-merah' };
+  const tbody = document.getElementById('tbody-surat');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--teks-abu);padding:24px">Tidak ada data</td></tr>'; return; }
+  tbody.innerHTML = data.map((s, i) => {
+    const idxAsli = DB.surat.indexOf(s);
+    const editAdmin = userLogin && userLogin.role === 'admin' && s.status !== 'Selesai'
+      ? `<select style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;margin-left:4px" onchange="ubahStatusSurat(${idxAsli},this.value)">
+          <option ${s.status==='Menunggu'?'selected':''}>Menunggu</option>
+          <option ${s.status==='Diproses'?'selected':''}>Diproses</option>
+          <option ${s.status==='Selesai'?'selected':''}>Selesai</option>
+          <option ${s.status==='Ditolak'?'selected':''}>Ditolak</option>
+         </select>` : '';
+    return `<tr>
+      <td style="font-size:11px">${s.noSurat}</td>
+      <td><b>${s.pemohon}</b></td>
+      <td>${s.jenis}</td>
+      <td>${s.tgl}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.keperluan}</td>
+      <td><span class="badge ${statusBadge[s.status]||'badge-emas'}">${s.status}</span>${editAdmin}</td>
+      <td>
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:11px" onclick="cetakSurat(${idxAsli})">🖨 Cetak</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function cetakSurat(idx) {
+  const s = DB.surat[idx];
+  const cfg = DB.pengaturan;
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>Surat ${s.noSurat}</title>
+  <style>body{font-family:Times New Roman,serif;margin:40px;} h2{text-align:center} .ttd{margin-top:60px;display:flex;justify-content:flex-end}</style></head><body>
+  <h2>SURAT KETERANGAN</h2><h3 style="text-align:center">${s.jenis.toUpperCase()}</h3>
+  <p style="text-align:center">Nomor: ${s.noSurat}</p><hr>
+  <p>Yang bertanda tangan di bawah ini, Kepala ${cfg.namaDusun}, ${cfg.namaDesa}, ${cfg.kecamatan}, dengan ini menerangkan bahwa:</p>
+  <table style="margin:20px 0;width:100%">
+    <tr><td width="180">Nama</td><td>: <b>${s.pemohon}</b></td></tr>
+    <tr><td>Keperluan</td><td>: ${s.keperluan}</td></tr>
+  </table>
+  <p>Demikian surat keterangan ini dibuat untuk digunakan sebagaimana mestinya.</p>
+  <div class="ttd">
+    <div style="text-align:center">
+      ${cfg.namaDusun}, ${s.tgl}<br><br><br><br>
+      <b>Kepala Dusun</b><br>${cfg.namaDusun}
+    </div>
+  </div>
+  </body></html>`);
+  w.print();
+}
+
+// ============================================================
+// KEUANGAN
+// ============================================================
+function hitungSaldo() {
+  return DB.keuangan.reduce((s, k) => k.jenis === 'masuk' ? s + k.jumlah : s - k.jumlah, 0);
+}
+function formatRp(n) { return 'Rp' + n.toLocaleString('id-ID'); }
+function modalKeuangan() {
+  document.getElementById('k-tgl').value = new Date().toISOString().split('T')[0];
+  document.getElementById('k-petugas').value = userLogin ? userLogin.nama : '';
+  bukaModal('modal-keuangan');
+}
+function simpanKeuangan() {
+  const data = {
+    tgl: document.getElementById('k-tgl').value,
+    ket: document.getElementById('k-ket').value.trim(),
+    jenis: document.getElementById('k-jenis').value,
+    jumlah: parseInt(document.getElementById('k-jumlah').value) || 0,
+    petugas: document.getElementById('k-petugas').value.trim(),
+  };
+  if (!data.ket || !data.jumlah) { toast('Isi semua kolom!', false); return; }
+  DB.keuangan.push(data);
+  saveData(DB);
+  tutupModal('modal-keuangan');
+  renderTabelKeuangan();
+  refreshDashboard();
+  toast('Transaksi dicatat!');
+  sinkronKeSheets('Keuangan', DB.keuangan);
+}
+function renderTabelKeuangan() {
+  let saldo = 0;
+  const tbody = document.getElementById('tbody-keuangan');
+  tbody.innerHTML = DB.keuangan.map((k, i) => {
+    saldo += k.jenis === 'masuk' ? k.jumlah : -k.jumlah;
+    return `<tr>
+      <td>${k.tgl}</td>
+      <td>${k.ket}</td>
+      <td><span class="badge ${k.jenis==='masuk'?'badge-hijau':'badge-merah'}">${k.jenis==='masuk'?'▲ Masuk':'▼ Keluar'}</span></td>
+      <td style="font-weight:600;color:${k.jenis==='masuk'?'var(--hijau)':'var(--merah)'}">${k.jenis==='masuk'?'+':'-'}${formatRp(k.jumlah)}</td>
+      <td>${formatRp(saldo)}</td>
+      <td>
+        ${userLogin && userLogin.role==='admin' ? `<button class="btn btn-merah" style="padding:5px 10px;font-size:11px" onclick="hapusKeuangan(${i})">🗑</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+  const masuk = DB.keuangan.filter(k=>k.jenis==='masuk').reduce((s,k)=>s+k.jumlah,0);
+  const keluar = DB.keuangan.filter(k=>k.jenis==='keluar').reduce((s,k)=>s+k.jumlah,0);
+  document.getElementById('total-masuk').textContent = formatRp(masuk);
+  document.getElementById('total-keluar').textContent = formatRp(keluar);
+  document.getElementById('saldo-kas').textContent = formatRp(masuk-keluar);
+}
+function hapusKeuangan(idx) {
+  if (!confirm('Hapus transaksi ini?')) return;
+  DB.keuangan.splice(idx, 1);
+  saveData(DB);
+  renderTabelKeuangan();
+  refreshDashboard();
+}
+
+// ============================================================
+// PENGUMUMAN
+// ============================================================
+function modalPengumuman() {
+  document.getElementById('p-tgl').value = new Date().toISOString().split('T')[0];
+  bukaModal('modal-pengumuman');
+}
+function simpanPengumuman() {
+  const data = {
+    judul: document.getElementById('p-judul').value.trim(),
+    isi: document.getElementById('p-isi').value.trim(),
+    tgl: document.getElementById('p-tgl').value,
+    prioritas: document.getElementById('p-prioritas').value,
+    penulis: userLogin ? userLogin.nama : 'Admin',
+  };
+  if (!data.judul || !data.isi) { toast('Isi judul dan isi!', false); return; }
+  DB.pengumuman.unshift(data);
+  saveData(DB);
+  tutupModal('modal-pengumuman');
+  renderListPengumuman();
+  refreshDashboard();
+  toast('Pengumuman dipublikasi!');
+  sinkronKeSheets('Pengumuman', DB.pengumuman);
+}
+function hapusPengumuman(idx) {
+  if (!confirm('Hapus pengumuman ini?')) return;
+  DB.pengumuman.splice(idx, 1);
+  saveData(DB);
+  renderListPengumuman();
+}
+function renderListPengumuman() {
+  const badge = { normal:'badge-biru', penting:'badge-emas', urgent:'badge-merah' };
+  const label = { normal:'Normal', penting:'⚡ Penting', urgent:'🔴 Mendesak' };
+  const el = document.getElementById('list-pengumuman');
+  if (!DB.pengumuman.length) { el.innerHTML = '<div style="color:var(--teks-abu);text-align:center;padding:40px">Belum ada pengumuman.</div>'; return; }
+  el.innerHTML = DB.pengumuman.map((p, i) => `
+    <div class="kartu" style="border-left:4px solid ${p.prioritas==='urgent'?'var(--merah)':p.prioritas==='penting'?'var(--emas)':'var(--biru)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <span class="badge ${badge[p.prioritas]}" style="margin-bottom:6px;display:inline-block">${label[p.prioritas]}</span>
+          <h3 style="font-size:16px;font-weight:700">${p.judul}</h3>
+        </div>
+        ${userLogin && userLogin.role==='admin' ? `<button class="btn btn-merah" style="padding:5px 12px;font-size:12px" onclick="hapusPengumuman(${i})">Hapus</button>` : ''}
+      </div>
+      <p style="font-size:14px;color:var(--teks);line-height:1.7">${p.isi}</p>
+      <div style="margin-top:12px;font-size:12px;color:var(--teks-abu)">📅 ${p.tgl} &nbsp;•&nbsp; ✍️ ${p.penulis}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// PENGGUNA
+// ============================================================
+function modalPengguna() { bukaModal('modal-pengguna'); }
+function simpanPengguna() {
+  const data = {
+    username: document.getElementById('u-username').value.trim(),
+    password: document.getElementById('u-password').value,
+    nama: document.getElementById('u-nama').value.trim(),
+    role: document.getElementById('u-role').value,
+    status: document.getElementById('u-status').value,
+    lastLogin: '-'
+  };
+  if (!data.username || !data.password || !data.nama) { toast('Isi semua kolom!', false); return; }
+  if (DB.pengguna.find(u => u.username === data.username)) { toast('Username sudah ada!', false); return; }
+  DB.pengguna.push(data);
+  saveData(DB);
+  tutupModal('modal-pengguna');
+  renderTabelPengguna();
+  toast('Pengguna ditambahkan!');
+}
+function hapusPengguna(idx) {
+  if (DB.pengguna[idx].username === userLogin.username) { toast('Tidak bisa hapus akun sendiri!', false); return; }
+  if (!confirm('Hapus pengguna ini?')) return;
+  DB.pengguna.splice(idx, 1);
+  saveData(DB);
+  renderTabelPengguna();
+}
+function renderTabelPengguna() {
+  const tbody = document.getElementById('tbody-pengguna');
+  tbody.innerHTML = DB.pengguna.map((u, i) => `<tr>
+    <td>${i+1}</td>
+    <td><code>${u.username}</code></td>
+    <td>${u.nama}</td>
+    <td><span class="badge ${u.role==='admin'?'badge-emas':'badge-biru'}">${u.role}</span></td>
+    <td><span class="badge ${u.status==='aktif'?'badge-hijau':'badge-merah'}">${u.status}</span></td>
+    <td style="font-size:12px">${u.lastLogin}</td>
+    <td>
+      <button class="btn btn-merah" style="padding:5px 10px;font-size:11px" onclick="hapusPengguna(${i})">🗑 Hapus</button>
+    </td>
+  </tr>`).join('');
+}
+
+// ============================================================
+// PENGATURAN
+// ============================================================
+function muatPengaturan() {
+  const c = DB.pengaturan;
+  document.getElementById('cfg-sheet-id').value = c.sheetId || '';
+  document.getElementById('cfg-script-url').value = c.scriptUrl || '';
+  document.getElementById('cfg-nama-dusun').value = c.namaDusun || '';
+  document.getElementById('cfg-nama-desa').value = c.namaDesa || '';
+  document.getElementById('cfg-kecamatan').value = c.kecamatan || '';
+}
+function simpanPengaturan() {
+  DB.pengaturan = {
+    sheetId: document.getElementById('cfg-sheet-id').value.trim(),
+    scriptUrl: document.getElementById('cfg-script-url').value.trim(),
+    namaDusun: document.getElementById('cfg-nama-dusun').value.trim() || 'Dusun Makmur',
+    namaDesa: document.getElementById('cfg-nama-desa').value.trim(),
+    kecamatan: document.getElementById('cfg-kecamatan').value.trim(),
+  };
+  saveData(DB);
+  document.getElementById('nama-dusun-top').textContent = DB.pengaturan.namaDusun;
+  toast('Pengaturan disimpan!');
+}
+
+// Ambil data Sheets via JSONP (menghindari CORS)
+function ambilDataSheets(sheetId, sheetName) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      reject(new Error('timeout'));
+    }, 8000);
+
+    window[cbName] = function(data) {
+      clearTimeout(timeout);
+      delete window[cbName];
+      document.getElementById('script-sheets-tmp') && document.getElementById('script-sheets-tmp').remove();
+      resolve(data);
+    };
+
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${cbName}&sheet=${encodeURIComponent(sheetName)}&tq=select *`;
+    const s = document.createElement('script');
+    s.id = 'script-sheets-tmp';
+    s.src = url;
+    s.onerror = () => { clearTimeout(timeout); delete window[cbName]; reject(new Error('load error')); };
+    document.head.appendChild(s);
+  });
+}
+
+function parseSheets(data) {
+  const cols = data.table.cols.map(c => c.label || c.id);
+  const rows = (data.table.rows || []).map(row => {
+    const obj = {};
+    (row.c || []).forEach((cell, i) => { obj[cols[i]] = cell ? (cell.v !== null ? cell.v : '') : ''; });
+    return obj;
+  });
+  return { cols, rows };
+}
+
+function tesKoneksi() {
+  const id = document.getElementById('cfg-sheet-id').value.trim();
+  if (!id) { toast('Masukkan Spreadsheet ID dulu!', false); return; }
+  if (id.includes('http') || id.includes('/')) { toast('⚠️ Isi hanya ID-nya saja, bukan URL lengkap!', false); return; }
+  toast('⏳ Menghubungkan ke Google Sheets...');
+  ambilDataSheets(id, 'Penduduk')
+    .then(() => toast('✅ Koneksi berhasil! Sheets dapat dibaca.'))
+    .catch(() => toast('❌ Gagal. Pastikan ID benar dan sheets sudah publik (Anyone with link - Viewer).', false));
+}
+
+// ============================================================
+// GOOGLE SHEETS INTEGRATION
+// ============================================================
+function imporSheets(tipe) {
+  const id = DB.pengaturan.sheetId;
+  if (!id) { toast('Konfigurasi Spreadsheet ID di Pengaturan dulu!', false); return; }
+  if (id.includes('http') || id.includes('/')) { toast('⚠️ Spreadsheet ID salah format! Isi hanya ID-nya saja.', false); return; }
+  const sheetMap = { penduduk:'Penduduk', surat:'Surat', keuangan:'Keuangan' };
+  const sheetName = sheetMap[tipe];
+  toast('⏳ Mengambil data dari Google Sheets...');
+  ambilDataSheets(id, sheetName)
+    .then(data => {
+      const { rows } = parseSheets(data);
+      if (tipe === 'penduduk') {
+        DB.penduduk = rows.map(r => ({
+          nik: String(r.NIK||''), nokk: String(r.NoKK||''), nama: r.Nama||'', jk: r.JenisKelamin||'L',
+          ttl: r.TglLahir||'', rt: r.RT||'RT 01', rw: r.RW||'RW 01',
+          agama: r.Agama||'Islam', pekerjaan: r.Pekerjaan||'', statusKK: r.StatusKK||'', hp: r.HP||''
+        }));
+        saveData(DB); renderTabelPenduduk(); refreshDashboard();
+      } else if (tipe === 'surat') {
+        DB.surat = rows.map(r => ({ noSurat:r.NoSurat||'', pemohon:r.Pemohon||'', jenis:r.JenisSurat||'', tgl:r.TglPengajuan||'', keperluan:r.Keperluan||'', status:r.Status||'Menunggu' }));
+        saveData(DB); renderTabelSurat(); refreshDashboard();
+      } else if (tipe === 'keuangan') {
+        DB.keuangan = rows.map(r => ({ tgl:r.Tanggal||'', ket:r.Keterangan||'', jenis:(r.Jenis||'masuk').toLowerCase(), jumlah:parseInt(r.Jumlah)||0 }));
+        saveData(DB); renderTabelKeuangan(); refreshDashboard();
+      }
+      toast(`✅ Data ${tipe} berhasil disinkronkan (${rows.length} baris)!`);
+    })
+    .catch(() => toast('❌ Gagal membaca Sheets. Periksa ID dan nama tab sheet.', false));
+}
+
+async function sinkronKeSheets(sheet, data) {
+  const url = DB.pengaturan.scriptUrl;
+  if (!url) return; // Tidak ada Apps Script, skip
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ sheet, data })
+    });
+  } catch(e) { /* silent */ }
+}
+
+function eksporSheets(tipe) {
+  const id = DB.pengaturan.sheetId;
+  if (id) {
+    window.open(`https://docs.google.com/spreadsheets/d/${id}`, '_blank');
+  } else {
+    // Export CSV
+    let csv = '';
+    if (tipe === 'penduduk') {
+      csv = 'NIK,NoKK,Nama,JenisKelamin,TglLahir,RT,RW,Agama,Pekerjaan,StatusKK,HP\n';
+      csv += DB.penduduk.map(p => `${p.nik},${p.nokk},"${p.nama}",${p.jk},${p.ttl},${p.rt},${p.rw},${p.agama},"${p.pekerjaan}",${p.statusKK},${p.hp}`).join('\n');
+    }
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `data_${tipe}.csv`;
+    a.click();
+    toast('Data diekspor ke CSV!');
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function refreshSemua() {
+  renderTabelPenduduk();
+  renderTabelSurat();
+  renderTabelKeuangan();
+  renderListPengumuman();
+  renderTabelPengguna();
+  muatPengaturan();
+  refreshDashboard();
+}
+</script>
+</body>
+</html>
