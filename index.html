@@ -735,8 +735,12 @@ function renderTabelPenduduk() {
       <td><span class="badge badge-hijau">${p.statusKK}</span></td>
       <td>${p.pekerjaan}</td>
       <td>
-        <button class="btn btn-outline" style="padding:5px 10px;font-size:11px" onclick="modalPenduduk(${idxAsli})">✏️</button>
-        <button class="btn btn-merah" style="padding:5px 10px;font-size:11px;margin-left:4px" onclick="hapusPenduduk(${idxAsli})">🗑</button>
+        ${userLogin && userLogin.role === 'admin' ? `
+          <button class="btn btn-outline" style="padding:5px 10px;font-size:11px" onclick="modalPenduduk(${idxAsli})">✏️</button>
+          <button class="btn btn-merah" style="padding:5px 10px;font-size:11px;margin-left:4px" onclick="hapusPenduduk(${idxAsli})">🗑</button>
+        ` : `
+          <span style="font-size:11px;color:var(--teks-abu);font-style:italic">Akses dibatasi</span>
+        `}
       </td>
     </tr>`;
   }).join('');
