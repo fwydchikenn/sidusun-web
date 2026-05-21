@@ -573,6 +573,11 @@ function prosesLogin() {
   }
   refreshSemua();
   bukaHalaman('dashboard');
+  if (DB.pengaturan.sheetId) {
+      setTimeout(() => imporSheets('penduduk'), 500);
+      setTimeout(() => imporSheets('surat'), 2000);
+      setTimeout(() => imporSheets('keuangan'), 3500);
+    }
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('halaman-login').style.display !== 'none') prosesLogin();
