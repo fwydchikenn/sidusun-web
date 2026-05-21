@@ -42,6 +42,7 @@
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-kiri">
+      <button class="btn-menu-mobile" onclick="toggleMenu()">☰</button>
       <span style="font-size:22px">🏡</span>
       <span class="nama-app">SiDusun</span>
       <span style="opacity:.5;font-size:18px">|</span>
@@ -1129,6 +1130,21 @@ function refreshSemua() {
   muatPengaturan();
   refreshDashboard();
 }
+  // ============================================================
+// MOBILE MENU
+// ============================================================
+function toggleMenu() {
+  document.querySelector('.sidebar').classList.toggle('buka');
+}
+
+// Menutup sidebar otomatis setelah salah satu menu diklik
+document.querySelectorAll('.menu-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      document.querySelector('.sidebar').classList.remove('buka');
+    }
+  });
+});
 </script>
 </body>
 </html>
